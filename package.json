@@ -1,0 +1,42 @@
+{
+  "name": "moleculer-blog",
+  "version": "1.0.0",
+  "description": "My Moleculer-based microservices project",
+  "scripts": {
+    "dev": "moleculer-runner --repl --hot services/**/*.service.js --envfile .env",
+    "start": "moleculer-runner",
+    "cli": "moleculer connect NATS",
+    "ci": "jest --watch",
+    "lint": "eslint services",
+    "dc:up": "docker-compose up --build -d",
+    "dc:logs": "docker-compose logs -f",
+    "dc:down": "docker-compose down"
+  },
+  "keywords": [
+    "microservices",
+    "moleculer"
+  ],
+  "author": "",
+  "devDependencies": {
+    "dotenv": "^16.0.0",
+    "eslint": "^7.32.0",
+    "moleculer-repl": "^0.6.6"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "ioredis": "^4.27.9",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "moleculer": "^0.14.16",
+    "moleculer-db": "^0.8.15",
+    "moleculer-db-adapter-mongo": "^0.4.13",
+    "moleculer-db-adapter-sequelize": "^0.2.13",
+    "moleculer-web": "^0.10.2",
+    "mysql2": "^2.3.3",
+    "nats": "^2.2.0",
+    "redlock": "^4.2.0"
+  },
+  "engines": {
+    "node": ">= 12.x.x"
+  }
+}
