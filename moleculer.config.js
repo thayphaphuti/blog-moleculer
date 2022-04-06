@@ -62,31 +62,6 @@ module.exports = {
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
-	cacher: {
-		type: "Redis",
-		options: {
-			prefix: null,
-			// set Time-to-live to 30sec.
-			ttl: 60 * 60,
-			// Redis settings
-			redis: {
-				port: 6379,
-				host: "127.0.0.1",
-			},
-			keygen(name, params, meta, keys) {
-				// Generate a cache key
-				// name - action name
-				// params - ctx.params
-				// meta - ctx.meta
-				// keys - cache keys defined in action
-				if (name == "users.signin") {
-					const key = `${name}.${params.email}`;
-					return key;
-				}
-				return name;
-			},
-		},
-	},
 
 	// Define a serializer.
 	// Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".

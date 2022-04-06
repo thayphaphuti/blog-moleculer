@@ -1,4 +1,4 @@
-const Sequelize = require("sequelize");
+const { Sequelize } = require("sequelize");
 const userModel = {
 	name: "user",
 	define: {
@@ -26,5 +26,4 @@ const userModel = {
 		},
 	},
 };
-
 module.exports = userModel;

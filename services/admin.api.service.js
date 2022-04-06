@@ -14,13 +14,13 @@ const jwt = require("jsonwebtoken");
  */
 
 module.exports = {
-	name: "api",
+	name: "admin-api",
 	mixins: [ApiGateway],
 
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 	settings: {
 		// Exposed port
-		port: process.env.PORT || 3000,
+		port: process.env.PORT || 3333,
 
 		// Exposed IP
 		ip: "0.0.0.0",
@@ -30,36 +30,12 @@ module.exports = {
 
 		routes: [
 			{
-				name: "categories",
-				path: "/api/categories/",
-				authentication: true,
-				authorization: true,
+				path: "/admin-api/user-permissions",
+				// authentication: true,
+				// whitelist: ["users.addPermission", "users.deletePermission"],
 				aliases: {
-					"GET /": "categories.list",
-					"POST /": "categories.create",
-					"GET /:id": "categories.get",
-					"PUT /:id": "categories.update",
-					"DELETE /:id": "categories.delete",
-				},
-			},
-			{
-				name: "posts",
-				path: "/api/posts/",
-				authentication: true,
-				authorization: true,
-				aliases: {
-					"GET /": "posts.list",
-					"POST /": "posts.create",
-					"GET /:id": "posts.get",
-					"PUT /:id": "posts.update",
-					"DELETE /:id": "posts.delete",
-				},
-			},
-			{
-				path: "/api/users",
-				aliases: {
-					"POST signin": "users.signin",
-					"POST signup": "users.signup",
+					"POST /:userId": "user-permissions.create",
+					"DELETE /:userId": "user-permissions.delete",
 				},
 			},
 		],

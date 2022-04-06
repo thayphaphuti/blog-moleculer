@@ -1,4 +1,4 @@
-const categoryModel = require("../models/category.model");
+const postModel = require("../models/post.model");
 const SqlAdapter = require("moleculer-db-adapter-sequelize");
 const DbService = require("moleculer-db");
 const {
@@ -8,18 +8,19 @@ const {
 	Delete,
 	NotFound,
 	Response,
+	BadRequest,
 } = require("../lib/response");
 const Redis = require("ioredis");
 const redis = new Redis();
 const ONE_DAY = 24 * 60 * 60;
 module.exports = {
-	name: "categories",
+	name: "posts",
 	mixins: [DbService],
 	adapter: new SqlAdapter("blog_api", "user-dev", "moleculer", {
 		host: "localhost",
 		dialect: "mysql",
 	}),
-	model: categoryModel,
+	model: postModel,
 	settings: {
 		fields: ["id", "title", "content"],
 	},
@@ -28,15 +29,11 @@ module.exports = {
 			rest: "GET /",
 			auth: "required",
 			async handler(ctx) {
-				const categoriesRedis = await redis.get("categories");
-				let data = JSON.parse(categoriesRedis);
+				const postRedis = await redis.get("post");
+				let data = JSON.parse(postRedis);
 				if (!data) {
 					data = await this.adapter.find({});
-					await redis.setex(
-						"categories",
-						ONE_DAY,
-						JSON.stringify(data)
-					);
+					await redis.setex("posts", ONE_DAY, JSON.stringify(data));
 					return Get(ctx, data);
 				}
 
@@ -53,9 +50,13 @@ module.exports = {
 			},
 			async handler(ctx) {
 				// const { title, content } = ctx.params;
-				const category = await this.adapter.insert(ctx.params);
-				await this.saveCategoriesInRedis();
-				return Create(ctx, null, category);
+				const { userId: authorId } = ctx.meta.user;
+				const post = await this.adapter.insert({
+					...ctx.params,
+					authorId,
+				});
+				// await this.saveCategoriesInRedis();
+				return Create(ctx, null, post);
 			},
 		},
 		get: {
@@ -70,7 +71,7 @@ module.exports = {
 				if (data) {
 					return Get(ctx, data);
 				} else {
-					return NotFound(ctx, "Category");
+					return NotFound(ctx, "Post");
 				}
 			},
 		},
@@ -83,20 +84,25 @@ module.exports = {
 			},
 			async handler(ctx) {
 				const { id, content } = ctx.params;
-				const checkEntryExist = await this.findExistsCategory(id);
+				const { userId } = ctx.meta.user;
+				const checkEntryExist = await this.adapter.findById(id);
+				console.log("checkEntryExist", checkEntryExist);
 				if (checkEntryExist) {
-					const updatedAt = new Date();
-					const updatedCategory = {
-						content,
-						updatedAt,
-					};
-					const data = await this.adapter.updateById(id, {
-						$set: updatedCategory,
-					});
-					await this.saveCategoriesInRedis();
-					return Update(ctx, data);
+					if (checkEntryExist.dataValues.authorId === userId) {
+						const updatedAt = new Date();
+						const updataPost = {
+							content,
+							updatedAt,
+						};
+						const data = await this.adapter.updateById(id, {
+							$set: updataPost,
+						});
+						return Update(ctx, data);
+					} else {
+						return BadRequest(ctx, "Cannot update Post");
+					}
 				} else {
-					return NotFound(ctx, "Category");
+					return NotFound(ctx, "Post");
 				}
 			},
 		},
@@ -108,34 +114,19 @@ module.exports = {
 			},
 			async handler(ctx) {
 				const { id } = ctx.params;
-				const checkEntryExist = await this.findExistsCategory(id);
+				const { userId } = ctx.meta.user;
+				const checkEntryExist = await this.adapter.findById(id);
 				if (checkEntryExist) {
-					const data = await this.adapter.removeById(id);
-					await this.saveCategoriesInRedis();
-					return Delete(ctx, data);
+					if (checkEntryExist.dataValues.authorId === userId) {
+						const data = await this.adapter.removeById(id);
+						return Delete(ctx, data);
+					} else {
+						return BadRequest(ctx, "Cannot delete post");
+					}
 				} else {
 					return NotFound(ctx, "Category");
 				}
 			},
-		},
-	},
-	methods: {
-		async saveCategoriesInRedis() {
-			const categories = await this.adapter.find({});
-			await redis.setex(
-				"categories",
-				ONE_DAY,
-				JSON.stringify(categories)
-			);
-		},
-		async findExistsCategory(id) {
-			const entityExists = await this.adapter.findOne({
-				where: {
-					id,
-				},
-			});
-			if (!entityExists) return false;
-			return true;
 		},
 	},
 };
