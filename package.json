@@ -20,7 +20,8 @@
   "devDependencies": {
     "dotenv": "^16.0.0",
     "eslint": "^7.32.0",
-    "moleculer-repl": "^0.6.6"
+    "moleculer-repl": "^0.6.6",
+    "sequelize-cli": "^6.4.1"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

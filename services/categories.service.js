@@ -15,10 +15,7 @@ const ONE_DAY = 24 * 60 * 60;
 module.exports = {
 	name: "categories",
 	mixins: [DbService],
-	adapter: new SqlAdapter("blog_api", "user-dev", "moleculer", {
-		host: "localhost",
-		dialect: "mysql",
-	}),
+	adapter: new SqlAdapter(process.env.MySQL_URI),
 	model: categoryModel,
 	settings: {
 		fields: ["id", "title", "content"],
@@ -28,8 +25,10 @@ module.exports = {
 			rest: "GET /",
 			auth: "required",
 			async handler(ctx) {
+				console.log("model:", this.model);
 				const categoriesRedis = await redis.get("categories");
 				let data = JSON.parse(categoriesRedis);
+				console.log(this.adapter.service.schema);
 				if (!data) {
 					data = await this.adapter.find({});
 					await redis.setex(

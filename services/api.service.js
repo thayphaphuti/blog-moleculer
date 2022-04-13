@@ -6,6 +6,7 @@ const Redis = require("ioredis");
 const redis = new Redis();
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
+const SqlAdapter = require("moleculer-db-adapter-sequelize");
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -15,6 +16,7 @@ const jwt = require("jsonwebtoken");
 
 module.exports = {
 	name: "api",
+
 	mixins: [ApiGateway],
 
 	// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
@@ -137,11 +139,8 @@ module.exports = {
 				// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
 				// Or use Promise
 				if (token) {
-					// Returns the resolved user. It will be set to the `ctx.meta.user`
-					const res = jwt.verify(token, process.env.JWT_SECRET);
-					// const res = await ctx.call("users.resolveToken", { token });
+					const res = jwt.verify(token, process.env.SECRETKEY);
 					const redisToken = await redis.get(res.data.userId);
-					// console.log("redisToken: ", redisToken);
 					if (!redisToken) {
 						// Invalid token
 						throw new MoleculerError(
@@ -206,7 +205,7 @@ module.exports = {
 			_.forIn(permissions, (value, key) => {
 				if (key === name) {
 					_.map(value, (data, index) => {
-						if (data === method) {
+						if (data.toUpperCase() === method) {
 							check = true;
 						}
 					});
@@ -216,7 +215,7 @@ module.exports = {
 				return;
 			} else {
 				throw new MoleculerError(
-					"Authorization failed",
+					"You have no permissions to access",
 					403,
 					"ERR_AUTHORIZATION"
 				);

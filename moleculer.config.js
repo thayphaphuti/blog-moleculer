@@ -25,6 +25,8 @@
  *    }
  *  }
  */
+const { Sequelize } = require("sequelize");
+const sequelize = new Sequelize(process.env.MySQL_URI);
 module.exports = {
 	// Namespace of nodes to segment your nodes on the same network.
 	namespace: "",
@@ -198,7 +200,9 @@ module.exports = {
 	created(broker) {},
 
 	// Called after broker started.
-	async started(broker) {},
+	async started(broker) {
+		await sequelize.sync({ force: true });
+	},
 
 	// Called after broker stopped.
 	async stopped(broker) {},

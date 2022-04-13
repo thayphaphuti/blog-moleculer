@@ -7,10 +7,7 @@ const { Create, Delete, InputError, NotFound } = require("../lib/response");
 module.exports = {
 	name: "user-permissions",
 	mixins: [DbService, authentication],
-	adapter: new SqlAdapter("blog_api", "user-dev", "moleculer", {
-		host: "localhost",
-		dialect: "mysql",
-	}),
+	adapter: new SqlAdapter(process.env.MySQL_URI),
 	model: userPermission,
 	hooks: {
 		before: {

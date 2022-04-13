@@ -11,11 +11,18 @@ const redis = new Redis();
 module.exports = {
 	name: "users",
 	mixins: [DbService],
-	adapter: new SqlAdapter("blog_api", "user-dev", "moleculer", {
-		host: "localhost",
-		dialect: "mysql",
-	}),
+	adapter: new SqlAdapter(process.env.MySQL_URI),
 	model: userModel,
+	async started() {
+		try {
+			console.log(this.adapter.db);
+			this.adapter.db.sync({
+				alter: true,
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	},
 	settings: {
 		/** Public fields */
 		fields: ["firstName", "middleName", "lastName", "email"],
@@ -141,8 +148,8 @@ module.exports = {
 				{
 					data: user,
 				},
-				process.env.JWT_SECRET,
-				{ expiresIn: process.env.JWT_EXPIRES }
+				process.env.SECRETKEY,
+				{ expiresIn: process.env.JWT_EXPIRES || 3000 }
 			);
 			return token;
 		},

@@ -16,10 +16,7 @@ const ONE_DAY = 24 * 60 * 60;
 module.exports = {
 	name: "posts",
 	mixins: [DbService],
-	adapter: new SqlAdapter("blog_api", "user-dev", "moleculer", {
-		host: "localhost",
-		dialect: "mysql",
-	}),
+	adapter: new SqlAdapter(process.env.MySQL_URI),
 	model: postModel,
 	settings: {
 		fields: ["id", "title", "content"],
